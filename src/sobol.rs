@@ -1,10 +1,22 @@
 use crate::traits::QRng;
 
-type DirNum = u16;
-const SOBOL_MAX_DIM: usize = 1111;
-const SOBOL_LOCS: &[DirNum] = include!("assets/sobol-lim-locs.rs");
-const SOBOL_COEF: &[DirNum] = include!("assets/sobol-lim-coef.rs");
-const SOBOL_DNUM: &[DirNum] = include!("assets/sobol-lim-dnum.rs");
+#[cfg(not(feature = "sobol-high-dim"))]
+mod assets {
+    pub type DirNum = u16;
+    pub const SOBOL_MAX_DIM: usize = 1111;
+    pub const SOBOL_LOCS: &[DirNum] = include!("assets/sobol-lim-locs.rs");
+    pub const SOBOL_COEF: &[DirNum] = include!("assets/sobol-lim-coef.rs");
+    pub const SOBOL_DNUM: &[DirNum] = include!("assets/sobol-lim-dnum.rs");
+}
+#[cfg(feature = "sobol-high-dim")]
+mod assets {
+    pub type DirNum = u32;
+    pub const SOBOL_MAX_DIM: usize = 21201;
+    pub const SOBOL_LOCS: &[DirNum] = include!("assets/sobol-all-locs.rs");
+    pub const SOBOL_COEF: &[DirNum] = include!("assets/sobol-all-coef.rs");
+    pub const SOBOL_DNUM: &[DirNum] = include!("assets/sobol-all-dnum.rs");
+}
+use self::assets::*;
 
 const MAX_LOG_N: usize = 48;
 
