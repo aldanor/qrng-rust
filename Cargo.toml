@@ -9,3 +9,10 @@ edition = "2018"
 [features]
 default = []
 sobol-high-dim = []
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "qrng"
+harness = false
