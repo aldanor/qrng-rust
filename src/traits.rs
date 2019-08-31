@@ -1,3 +1,5 @@
+use crate::with_buf::QRngWithBuf;
+
 /// Multi-dimensional quasi-random sequence generator.
 ///
 /// Implementors of this trait are sequence generators that hold internal mutable
@@ -46,5 +48,21 @@ pub trait QRng: Clone {
         unsafe {
             self.gen_fill_unchecked(out);
         }
+    }
+
+    /// Returns a wrapper (TODO: ...).
+    ///
+    /// See [`QRngWithBuf`](struct.QRngWithBuf.html) (TODO: ...).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrng::*;
+    /// let mut seq = SobolSeq::new(5).with_buf();
+    /// let next = seq.gen();
+    /// ```
+    #[inline]
+    fn with_buf(self) -> QRngWithBuf<Self> {
+        QRngWithBuf::new(self)
     }
 }
