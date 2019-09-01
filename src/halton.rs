@@ -106,3 +106,89 @@ impl QRng for HaltonSeq {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::HaltonSeq;
+    use crate::{utils::primes, QRng};
+
+    const TOL: f64 = 1e-15;
+
+    #[test]
+    fn test_halton_seq_mod2() {
+        let halton2 = vec![
+            0.50000, // first cycle (zero excluded)
+            0.25000, 0.75000, // second cycle
+            0.12500, 0.62500, 0.37500, 0.87500, // third cycle
+            // fourth cycle
+            0.06250, 0.56250, 0.31250, 0.81250, 0.18750, 0.68750, 0.43750, 0.93750,
+            // fifth cycle
+            0.03125, 0.53125, 0.28125, 0.78125, 0.15625, 0.65625, 0.40625, 0.90625, 0.09375,
+            0.59375, 0.34375, 0.84375, 0.21875, 0.71875, 0.46875, 0.96875,
+        ];
+        let mut seq = HaltonSeq::new(1).with_buf();
+        for &x in halton2.iter() {
+            assert!((x - seq.gen()[0]).abs() < TOL);
+        }
+    }
+
+    #[test]
+    fn test_halton_seq_mod3() {
+        let halton3 = vec![
+            // first cycle (zero excluded)
+            1. / 3.,
+            2. / 3.,
+            // second cycle
+            1. / 9.,
+            4. / 9.,
+            7. / 9.,
+            2. / 9.,
+            5. / 9.,
+            8. / 9.,
+            // third cycle
+            1. / 27.,
+            10. / 27.,
+            19. / 27.,
+            4. / 27.,
+            13. / 27.,
+            22. / 27.,
+            7. / 27.,
+            16. / 27.,
+            25. / 27.,
+            2. / 27.,
+            11. / 27.,
+            20. / 27.,
+            5. / 27.,
+            14. / 27.,
+            23. / 27.,
+            8. / 27.,
+            17. / 27.,
+            26. / 27.,
+        ];
+        let mut seq = HaltonSeq::new(2).with_buf();
+        for &x in halton3.iter() {
+            assert!((x - seq.gen()[1]).abs() < TOL);
+        }
+    }
+
+    #[test]
+    fn test_halton_seq_mean() {
+        const MAX_DIM: usize = 7;
+        for ndim in 1..=MAX_DIM {
+            let p = primes().nth(ndim - 1).unwrap();
+            let (mut sum, mut count) = (0., 0);
+            let mut seq = HaltonSeq::new(ndim).with_buf();
+            let mut cycle_len = p - 1; // initial cycle length
+            for _ in 0..4 {
+                // run 4 full cycles for the selected dimension
+                for _ in 0..cycle_len {
+                    sum += seq.gen()[ndim - 1];
+                    count += 1;
+                }
+                cycle_len *= p; // cycle length is (p - 1) * p^n
+            }
+            let mean = sum / (count as f64);
+            assert!((mean - 0.5).abs() < TOL);
+        }
+    }
+}
